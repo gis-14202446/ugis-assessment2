@@ -19,4 +19,8 @@ start_time = perf_counter()
 # --- NO CODE BELOW HERE ---
 
 # report runtime
+
+#Load tweets data
+tweets = read_file("./data/wr/level3-tweets-subset.shp")
+
 print(f"completed in: {perf_counter() - start_time} seconds")
