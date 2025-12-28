@@ -15,7 +15,7 @@ start_time = perf_counter()
 
 ''' --- ALL CODE MUST BE INSIDE HERE --- '''
 
-
+#basic structure in place, ready to start loading data
 # --- NO CODE BELOW HERE ---
 
 # report runtime
