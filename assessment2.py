@@ -24,5 +24,7 @@ start_time = perf_counter()
 tweets = read_file("./data/wr/level3-tweets-subset.shp")
 #load district polygons
 distrcts = read_file("./data/wr/gm-districts.shp")
-
+#Align CRS if needed
+if tweets.crs != distrcts.crs:
+    tweets = tweets.to_crs(distrcts.crs)
 print(f"completed in: {perf_counter() - start_time} seconds")
