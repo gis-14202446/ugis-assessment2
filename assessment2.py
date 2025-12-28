@@ -22,5 +22,7 @@ start_time = perf_counter()
 
 #Load tweets data
 tweets = read_file("./data/wr/level3-tweets-subset.shp")
+#load district polygons
+distrcts = read_file("./data/wr/gm-districts.shp")
 
 print(f"completed in: {perf_counter() - start_time} seconds")
