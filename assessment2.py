@@ -1,8 +1,11 @@
 """
 Understanding GIS: Assessment 2
-@author [INSERT STUDENT NUMBER HERE]
+@author [14202446]
 """
 from time import perf_counter
+from geopandas import read_file
+from rasterio import open as rio_open
+
 
 # set start time
 start_time = perf_counter()	
