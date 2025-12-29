@@ -24,6 +24,18 @@ def generate_random_point_in_bbox(minx, miny, maxx, maxy):
   y = uniform(miny,maxy)
   return(x,y)
 
+def get_raster_value_at_point(x, y, raster_data, transform):
+    """Extract the raster value at a given point"""
+    # Convert from coordinates to array indices
+    row, col = ~transform * (x, y)
+    row, col = int(row), int(col)
+    
+    # Check bounds and return value
+    if 0 <= row < raster_data.shape[0] and 0 <= col < raster_data.shape[1]:
+        return raster_data[row, col]
+    else:
+        return 0
+    
 # Set seed for reproducibilit
 seed(42)
 # report runtime
