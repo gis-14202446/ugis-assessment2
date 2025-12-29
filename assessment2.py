@@ -40,6 +40,21 @@ def get_raster_value_at_point(x, y, raster_data, transform):
 def weighted_redisdtribution(tweets_gdf, districts_gdf, weight_raster, weight_transform):
   """Redistribute tweets based on population density weighting"""
   redistributed_tweets = tweets_gdf.copy()
+  
+  # Create spatial index for efficient lookups
+  districts_sindex = districts_gdf.sindex
+    
+  for idx, tweet in tweets_gdf.iterrows():
+      # Use spatial index to find candidate districts
+      possible_matches_index = list(districts_sindex.intersection(tweet.geometry.bounds))
+      possible_matches = districts_gdf.iloc[possible_matches_index]
+      precise_matches = possible_matches[possible_matches.contains(tweet.geometry)]
+        
+      if len(precise_matches) == 0:
+          continue
+        
+      # Get the district polygon
+      district = precise_matches.iloc[0]
     
   # Will iterate through tweets here
     
