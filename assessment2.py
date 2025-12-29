@@ -21,15 +21,15 @@ start_time = perf_counter()
 # report runtime
 
 #Load tweets data
-tweets = read_file(r"D:\p drive\data\wr\level3-tweets-subset.shp")
+tweets = read_file("data/wr/level3-tweets-subset.shp")
 #load district polygons
-distrcts = read_file(r"D:\p drive\data\wr\gm-districts.shp")
+distrcts = read_file("data/wr/gm-districts.shp")
 #Align CRS if needed
 if tweets.crs != distrcts.crs:
     tweets = tweets.to_crs(distrcts.crs)
     
 #load population raster
-with rio_open(r"D:\p drive\data\wr\100m_pop_2019.tif") as pop_raster:
+with rio_open("data/wr/100m_pop_2019.tif") as pop_raster:
  pop_data = pop_raster.read(1)
  pop_transform = pop_raster.transform
  pop_crs = pop_raster.crs
