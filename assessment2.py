@@ -5,6 +5,7 @@ Understanding GIS: Assessment 2
 from time import perf_counter
 from geopandas import read_file
 from rasterio import open as rio_open
+from numpy.random import uniform, seed
 
 
 # set start time
@@ -17,7 +18,14 @@ start_time = perf_counter()
 
 #basic structure in place, ready to start loading data
 # --- NO CODE BELOW HERE ---
+def generate_random_point_in_bbox(minx, miny, maxx, maxy):
+  """Generate a random point within a bounding box using cartesian coordinates"""
+  x = uniform(minx, maxx)
+  y = uniform(miny,maxy)
+  return(x,y)
 
+# Set seed for reproducibilit
+seed(42)
 # report runtime
 
 #Load tweets data
