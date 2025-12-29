@@ -6,6 +6,7 @@ from time import perf_counter
 from geopandas import read_file
 from rasterio import open as rio_open
 from numpy.random import uniform, seed
+from shapely.geometry import Point
 
 
 # set start time
@@ -36,6 +37,13 @@ def get_raster_value_at_point(x, y, raster_data, transform):
     else:
         return 0
     
+def weighted_redisdtribution(tweets_gdf, districts_gdf, weight_raster, weight_transform):
+  """Redistribute tweets based on population density weighting"""
+  redistributed_tweets = tweets_gdf.copy()
+    
+  # Will iterate through tweets here
+    
+  return redistributed_tweets  
 # Set seed for reproducibilit
 seed(42)
 # report runtime
