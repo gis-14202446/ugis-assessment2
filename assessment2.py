@@ -34,5 +34,9 @@ with rio_open(r"D:\p drive\data\wr\100m_pop_2019.tif") as pop_raster:
  pop_transform = pop_raster.transform
  pop_crs = pop_raster.crs
  
- 
+ #Reproject both datasets to match the raster
+ if str(tweets.crs) != str(pop_crs):
+     tweets = tweets.to_crs(pop_crs)
+     distrcts = distrcts.to_crs(pop_crs)
+     
 print(f"completed in: {perf_counter() - start_time} seconds")
