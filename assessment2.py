@@ -145,5 +145,9 @@ redistributed_tweets = weighted_redistribution(
   n_iterations=100
 )
 
+# Generate density surfaces for visualization
+with rio_open("./data/wr/100m_pop_2019.tif") as pop_raster:
+    original_density, density_transform = create_density_surface(tweets, pop_raster, cell_size=500)
+    redistributed_density, _ = create_density_surface(redistributed_tweets, pop_raster, cell_size=500)
      
 print(f"completed in: {perf_counter() - start_time} seconds")
