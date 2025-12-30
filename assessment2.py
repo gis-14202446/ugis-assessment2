@@ -38,7 +38,7 @@ def get_raster_value_at_point(x, y, raster_data, transform):
     else:
         return 0
     
-def weighted_redisdtribution(tweets_gdf, districts_gdf, weight_raster, weight_transform, n_iterations= 100):
+def weighted_redistribution(tweets_gdf, districts_gdf, weight_raster, weight_transform, n_iterations= 100):
   """Redistribute tweets based on population density weighting"""
   redistributed_tweets = tweets_gdf.copy()
   
@@ -120,10 +120,10 @@ seed(42)
 #Load tweets data
 tweets = read_file("data/wr/level3-tweets-subset.shp")
 #load district polygons
-distrcts = read_file("data/wr/gm-districts.shp")
+districts = read_file("data/wr/gm-districts.shp")
 #Align CRS if needed
-if tweets.crs != distrcts.crs:
-    tweets = tweets.to_crs(distrcts.crs)
+if tweets.crs != districts.crs:
+    tweets = tweets.to_crs(districts.crs)
     
 #load population raster
 with rio_open("data/wr/100m_pop_2019.tif") as pop_raster:
@@ -134,7 +134,7 @@ with rio_open("data/wr/100m_pop_2019.tif") as pop_raster:
  #Reproject both datasets to match the raster
  if str(tweets.crs) != str(pop_crs):
      tweets = tweets.to_crs(pop_crs)
-     distrcts = distrcts.to_crs(pop_crs)
+     districts = districts.to_crs(pop_crs)
  
 # Run the algorithm
 redistributed_tweets = weighted_redistribution(
