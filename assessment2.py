@@ -37,12 +37,13 @@ def get_raster_value_at_point(x, y, raster_data, transform):
     else:
         return 0
     
-def weighted_redisdtribution(tweets_gdf, districts_gdf, weight_raster, weight_transform):
+def weighted_redisdtribution(tweets_gdf, districts_gdf, weight_raster, weight_transform, n_iterations= 100):
   """Redistribute tweets based on population density weighting"""
   redistributed_tweets = tweets_gdf.copy()
   
   # Create spatial index for efficient lookups
   districts_sindex = districts_gdf.sindex
+  redistributed_count = 0
     
   for idx, tweet in tweets_gdf.iterrows():
       # Use spatial index to find candidate districts
@@ -55,9 +56,35 @@ def weighted_redisdtribution(tweets_gdf, districts_gdf, weight_raster, weight_tr
         
       # Get the district polygon
       district = precise_matches.iloc[0]
+      district_geom = district.geometry
+      minx, miny, maxx, maxy = district_geom.bounds
+      
+      max_weight = 0
+      best_point = None
+     
+      # Try n random points and pick the best
+      for _ in range(n_iterations):
+         rand_x, rand_y = generate_random_point_in_bbox(minx, miny, maxx, maxy)
+         rand_point = Point(rand_x, rand_y)
+            
+         # Make sure point is actually inside the district
+         if not district_geom.contains(rand_point):
+             continue
+            
+         # Sample population density
+         weight = get_raster_value_at_point(rand_x, rand_y, weight_raster, weight_transform)
+            
+         # Keep track of best candidate
+         if weight > max_weight:
+             max_weight = weight
+             best_point = rand_point
+        
+      # Update location if we found a better spot
+      if best_point is not None and max_weight > 0:
+          redistributed_tweets.at[idx, 'geometry'] = best_point
+          redistributed_count += 1
     
-  # Will iterate through tweets here
-    
+  print(f"Redistributed {redistributed_count}/{len(tweets_gdf)} tweets")
   return redistributed_tweets  
 # Set seed for reproducibilit
 seed(42)
@@ -81,5 +108,15 @@ with rio_open("data/wr/100m_pop_2019.tif") as pop_raster:
  if str(tweets.crs) != str(pop_crs):
      tweets = tweets.to_crs(pop_crs)
      distrcts = distrcts.to_crs(pop_crs)
+ 
+# Run the algorithm
+redistributed_tweets = weighted_redistribution(
+  tweets_gdf=tweets,
+  districts_gdf=districts, 
+  weight_raster=pop_data,
+  weight_transform=pop_transform,
+  n_iterations=100
+)
+
      
 print(f"completed in: {perf_counter() - start_time} seconds")
