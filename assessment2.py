@@ -6,6 +6,7 @@ from time import perf_counter
 from geopandas import read_file
 from rasterio import open as rio_open
 from numpy.random import uniform, seed
+from numpy import zeros
 from shapely.geometry import Point
 
 
@@ -86,6 +87,32 @@ def weighted_redisdtribution(tweets_gdf, districts_gdf, weight_raster, weight_tr
     
   print(f"Redistributed {redistributed_count}/{len(tweets_gdf)} tweets")
   return redistributed_tweets  
+
+def create_density_surface(points_gdf, raster_template, cell_size=500):
+   """
+    Create a density surface by counting points in each cell.
+    Using 500m cells for a good visualization scale.
+    """
+   bounds = raster_template.bounds
+   
+   width = int((bounds.right - bounds.left) / cell_size)
+   height = int((bounds.top - bounds.bottom) / cell_size)
+    
+   density = zeros((height, width))
+   
+   for _, point in points_gdf.iterrows():
+     x, y = point.geometry.x, point.geometry.y
+        
+     col = int((x - bounds.left) / cell_size)
+     row = int((bounds.top - y) / cell_size)
+        
+     if 0 <= row < height and 0 <= col < width:
+            density[row, col] += 1
+    
+   from rasterio.transform import from_bounds
+   transform = from_bounds(bounds.left, bounds.bottom, bounds.right, bounds.top, width, height)
+    
+   return density, transform   
 # Set seed for reproducibilit
 seed(42)
 # report runtime
