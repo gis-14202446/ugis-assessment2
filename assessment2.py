@@ -8,6 +8,12 @@ from rasterio import open as rio_open
 from numpy.random import uniform, seed
 from numpy import zeros
 from shapely.geometry import Point
+from matplotlib.pyplot import subplots
+from matplotlib.patches import Patch
+from matplotlib_scalebar.scalebar import ScaleBar
+from rasterio.plot import show as rio_show
+from matplotlib.colors import LinearSegmentedColormap
+
 
 
 # set start time
@@ -149,5 +155,42 @@ redistributed_tweets = weighted_redistribution(
 with rio_open("./data/wr/100m_pop_2019.tif") as pop_raster:
     original_density, density_transform = create_density_surface(tweets, pop_raster, cell_size=500)
     redistributed_density, _ = create_density_surface(redistributed_tweets, pop_raster, cell_size=500)
-     
+
+# Create side-by-side comparison
+fig,(ax1, ax2) = subplots(1, 2, figsize=(20, 10))
+
+# Let panel: Original
+ax1.set_title("Original Tweet Locations (False Hotspots)", fontsize=14, fontweight='bold')
+ax1.axis('off')
+
+rio_show(pop_data, ax=ax1, transform=pop_transform, cmap='YlOrRd', alpha=0.3)
+districts.plot(ax=ax1, facecolor='none', edgecolor='black', linewidth=1)
+rio_show(original_density, ax=ax1, transform=density_transform,
+         cmap=LinearSegmentedColormap.from_list('hotspot', [(0,0,0,0), (0,0,1,0.6), (1,0,0,0.8)]))
+tweets.plot(ax=ax1, markersize=5, color='blue', alpha=0.5)
+
+ax1.legend(handles=[
+    Patch(facecolor='red', alpha=0.6, label='High Tweet Density'),
+    Patch(facecolor='none', edgecolor='black', label='Districts'),
+    Patch(facecolor='yellow', alpha=0.3, label='Population Density')
+], loc='upper right')
+ax1.add_artist(ScaleBar(dx=1, units="m", location="lower left"))
+
+# Right panel: Redistributed
+ax2.set_title("Redistributed Tweet Locations (Weighted by Population)", fontsize=14, fontweight='bold')
+ax2.axis('off')
+
+rio_show(pop_data, ax=ax2, transform=pop_transform, cmap='YlOrRd', alpha=0.3)
+districts.plot(ax=ax2, facecolor='none', edgecolor='black', linewidth=1)
+rio_show(redistributed_density, ax=ax2, transform=density_transform,
+         cmap=LinearSegmentedColormap.from_list('hotspot', [(0,0,0,0), (0,0,1,0.6), (1,0,0,0.8)]))
+redistributed_tweets.plot(ax=ax2, markersize=5, color='green', alpha=0.5)
+
+ax2.legend(handles=[Patch(facecolor='red', alpha=0.6, label='High Tweet Density'),
+    Patch(facecolor='none', edgecolor='black', label='Districts'),
+    Patch(facecolor='yellow', alpha=0.3, label='Population Density')], loc='upper right')
+ax2.add_artist(ScaleBar(dx=1, units="m", location="lower left"))
+
+fig.suptitle('Weight Redistribution: Addressing False Hotspots in Royal Wedding Twitter Data', fontsize=16, fontweight='bold', y=0.98)
+
 print(f"completed in: {perf_counter() - start_time} seconds")
