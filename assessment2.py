@@ -8,11 +8,12 @@ from rasterio import open as rio_open
 from numpy.random import uniform, seed
 from numpy import zeros
 from shapely.geometry import Point
-from matplotlib.pyplot import subplots
+from matplotlib.pyplot import subplots, savefig
 from matplotlib.patches import Patch
 from matplotlib_scalebar.scalebar import ScaleBar
 from rasterio.plot import show as rio_show
 from matplotlib.colors import LinearSegmentedColormap
+
 
 
 
@@ -44,7 +45,7 @@ def get_raster_value_at_point(x, y, raster_data, transform):
     else:
         return 0
     
-def weighted_redistribution(tweets_gdf, districts_gdf, weight_raster, weight_transform, n_iterations= 100):
+def weighted_redistribution(tweets_gdf, districts_gdf, weight_raster, weight_transform, n_iterations= 100, radius_factor=1.5):
   """Redistribute tweets based on population density weighting"""
   redistributed_tweets = tweets_gdf.copy()
   
@@ -148,11 +149,12 @@ redistributed_tweets = weighted_redistribution(
   districts_gdf=districts, 
   weight_raster=pop_data,
   weight_transform=pop_transform,
-  n_iterations=100
+  n_iterations=100,
+  radius_factor=1.5
 )
 
 # Generate density surfaces for visualization
-with rio_open("./data/wr/100m_pop_2019.tif") as pop_raster:
+with rio_open("data/wr/100m_pop_2019.tif") as pop_raster:
     original_density, density_transform = create_density_surface(tweets, pop_raster, cell_size=500)
     redistributed_density, _ = create_density_surface(redistributed_tweets, pop_raster, cell_size=500)
 
@@ -192,5 +194,12 @@ ax2.legend(handles=[Patch(facecolor='red', alpha=0.6, label='High Tweet Density'
 ax2.add_artist(ScaleBar(dx=1, units="m", location="lower left"))
 
 fig.suptitle('Weight Redistribution: Addressing False Hotspots in Royal Wedding Twitter Data', fontsize=16, fontweight='bold', y=0.98)
+
+# Save outputs
+savefig('out/weighted_redistribution_comparison.png', dpi=300, bbox_inches='tight')
+print("Map saved to: out/weighted_redistribution_comparison.png")
+
+redistributed_tweets.to_file("out/redistributed_tweets.shp")
+print("Redistributed tweets saved to: out/redistributed_tweets.shp")
 
 print(f"completed in: {perf_counter() - start_time} seconds")
